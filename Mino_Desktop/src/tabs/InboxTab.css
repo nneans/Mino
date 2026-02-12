@@ -1,0 +1,212 @@
+.inbox-container {
+    padding: 16px 24px;
+}
+
+.inbox-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.inbox-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Inbox Search */
+.inbox-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inbox-search-input {
+    width: 200px;
+    padding: 6px 32px 6px 12px;
+    border: 1px solid var(--border-main, #e2e8f0);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    background: var(--bg-surface, #f9fafb);
+    color: var(--text-main, #111827);
+    transition: all 0.2s;
+}
+
+.inbox-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    width: 260px;
+}
+
+.inbox-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.search-clear-btn:hover {
+    color: var(--text-secondary);
+}
+
+.inbox-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.inbox-filters.new-style {
+    align-items: center;
+}
+
+.reset-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    background: transparent;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    color: var(--danger);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.reset-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-light);
+    background: white;
+    border-radius: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: #f8fafc;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-data-msg {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.inbox-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.tx-count {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.inbox-list {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    max-height: 70vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.inbox-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+}
+
+.inbox-item:hover {
+    background: var(--bg);
+}
+
+.inbox-item:last-child {
+    border-bottom: none;
+}
+
+.inbox-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.inbox-place {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.inbox-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.inbox-location-badge {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.inbox-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.inbox-amount {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.inbox-amount.income {
+    color: var(--success);
+}
+
+.inbox-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.inbox-item:hover .inbox-actions {
+    opacity: 1;
+}

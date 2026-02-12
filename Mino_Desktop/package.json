@@ -1,0 +1,72 @@
+{
+  "name": "mino",
+  "productName": "Mino",
+  "version": "2.0.0",
+  "description": "Personal Finance Manager - AI-powered expense tracker (IPC Mode)",
+  "author": "nneans33@gmail.com",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "VITE_DEMO_MODE=false vite build",
+    "build:demo": "VITE_DEMO_MODE=true vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder --mac",
+    "electron:build:demo": "npm run build:demo && electron-builder --mac --config.productName='Mino Demo' --config.appId='com.mino.demo'"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
+    "imap": "^0.8.19",
+    "leaflet": "^1.9.4",
+    "mailparser": "^3.9.1",
+    "node-fetch": "^2.7.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "electron-squirrel-startup": "^1.0.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "vite": "^7.2.4",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.mino.finance",
+    "productName": "Mino",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "electron/icon.icns"
+    }
+  }
+}

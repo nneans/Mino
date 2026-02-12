@@ -1,0 +1,8 @@
+.spending-chart {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    /* Allow flex shrink */
+    height: 100%;
+    /* Fill parent container */
+}

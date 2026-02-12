@@ -1,0 +1,35 @@
+# General
+.DS_Store
+.env
+*.log
+
+# Mino_Homepage
+Mino_Homepage/node_modules/
+Mino_Homepage/dist/
+
+# Mino_Desktop
+Mino_Desktop/node_modules/
+Mino_Desktop/dist/
+Mino_Desktop/release/
+Mino_Desktop/out/
+
+# MMG-Web (old leftover?)
+MMG-Web/
+
+# Backend (if any exists in root or subfolders)
+**/venv/
+**/__pycache__/
+**/*.db
+**/*.db.bak
+**/config.json
+**/*.pyc
+
+# Others
+.agent/
+.gemini/
+
+# Exclude all large files potentially in other places
+*.dmg
+*.zip
+*.node
+*.pkg

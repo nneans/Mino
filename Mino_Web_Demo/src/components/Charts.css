@@ -1,0 +1,6 @@
+.spending-chart {
+    width: 100%;
+    /* flex: 1로 부모 카드의 남은 공간을 채움 */
+    flex: 1;
+    min-height: 300px;
+}
