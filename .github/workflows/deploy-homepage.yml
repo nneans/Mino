@@ -1,0 +1,29 @@
+name: Deploy Homepage to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Mino_Homepage/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Install and Build 🔧
+        working-directory: ./Mino_Homepage
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: Mino_Homepage/dist
+          branch: gh-pages
