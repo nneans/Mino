@@ -419,7 +419,7 @@ function App() {
       {/* Footer */}
       <footer className="py-12 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto px-6 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Mino Finance. Built for macOS.</p>
+          <p>&copy; {new Date().getFullYear()} Mino. Built for macOS.</p>
         </div>
       </footer>
     </div>
