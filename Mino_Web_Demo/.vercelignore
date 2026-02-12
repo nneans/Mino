@@ -1,7 +1,0 @@
-창업/release
-node_modules
-electron
-.git
-.DS_Store
-dist
-*.log
