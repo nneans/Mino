@@ -34,7 +34,7 @@ function App() {
       <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-white/80 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <Github className="w-8 h-8 text-gray-900" />
+            <Github className="w-8 h-8" style={{ color: '#6e5494' }} />
             Mino
           </div>
           <div className="flex items-center gap-6 text-sm font-medium text-gray-500">
