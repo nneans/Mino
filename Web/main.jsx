@@ -6,7 +6,6 @@ import screen2 from './assets/screen2.png';
 import screen3 from './assets/screen3.png';
 import screen4 from './assets/screen4.png';
 import screen5 from './assets/screen5.png';
-import minoIcon from './assets/mino_logo.png';
 
 const screenshots = [
   { src: screen1, title: '대시보드', desc: '자산 현황과 지출 내역을 한눈에 파악' },
