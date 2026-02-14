@@ -7,11 +7,12 @@
 Mino_Homepage/node_modules/
 Mino_Homepage/dist/
 
-# Mino_Desktop
-Mino_Desktop/node_modules/
-Mino_Desktop/dist/
-Mino_Desktop/release/
-Mino_Desktop/out/
+# App
+App/node_modules/
+App/dist/
+App/release/
+App/out/
+App/electron-builder.yaml
 
 # MMG-Web (old leftover?)
 MMG-Web/
