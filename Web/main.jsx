@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, ChevronRight, ChevronLeft, Github, Mail, Map as MapIcon, MessageSquare, AlertTriangle, CheckCircle2, Command, Globe, Server, Code, Monitor, ExternalLink } from 'lucide-react';
+import logo from './assets/logo.png';
 import screen1 from './assets/screen1.png';
 import screen2 from './assets/screen2.png';
 import screen3 from './assets/screen3.png';
@@ -33,7 +34,7 @@ function App() {
       <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-white/80 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <span className="text-2xl">🐖</span>
+            <img src={logo} alt="Mino" className="w-8 h-8 rounded-lg" />
             Mino
           </div>
           <div className="flex items-center gap-6 text-sm font-medium text-gray-500">
@@ -44,6 +45,7 @@ function App() {
               Demo
             </a>
             <a href="https://github.com/nneans/Mino" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
+              <span className="sr-only">GitHub</span>
               <Github className="w-5 h-5" />
             </a>
           </div>
