@@ -422,16 +422,34 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="mt-8 p-6 bg-yellow-50 border border-yellow-100 rounded-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <MapIcon className="w-24 h-24 text-yellow-600" />
+                  <div className="mt-8 grid md:grid-cols-2 gap-8 pt-8 border-t border-gray-100">
+                    <div className="p-6 bg-yellow-50 border border-yellow-100 rounded-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <MapIcon className="w-24 h-24 text-yellow-600" />
+                      </div>
+                      <h4 className="font-bold text-yellow-800 mb-2 relative z-10">💡 왜 file:// 인가요?</h4>
+                      <p className="text-sm text-yellow-900 leading-relaxed relative z-10">
+                        Mino와 같은 <strong>Electron 앱(데스크톱 앱)</strong>은 내부적으로 파일을 읽을 때 <code>file://</code> 프로토콜을 사용합니다.<br />
+                        이 설정은 "내 PC안의 로컬 파일에서 지도를 불러오는 것을 허용하겠다"는 의미이므로,
+                        사용자마다 파일 경로가 달라도 문제없이 작동합니다. 안심하고 등록해주세요!
+                      </p>
                     </div>
-                    <h4 className="font-bold text-yellow-800 mb-2 relative z-10">💡 왜 file:// 인가요?</h4>
-                    <p className="text-sm text-yellow-900 leading-relaxed relative z-10">
-                      Mino와 같은 <strong>Electron 앱(데스크톱 앱)</strong>은 내부적으로 파일을 읽을 때 <code>file://</code> 프로토콜을 사용합니다.<br />
-                      이 설정은 "내 PC안의 로컬 파일에서 지도를 불러오는 것을 허용하겠다"는 의미이므로,
-                      사용자마다 파일 경로가 달라도 문제없이 작동합니다. 안심하고 등록해주세요!
-                    </p>
+
+                    <div className="p-6 bg-blue-50 border border-blue-100 rounded-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <Globe className="w-24 h-24 text-blue-600" />
+                      </div>
+                      <h4 className="font-bold text-blue-800 mb-2 relative z-10">📍 근처 위치가 작동하지 않나요?</h4>
+                      <div className="text-sm text-blue-900 leading-relaxed relative z-10 space-y-2">
+                        <p>지도와 검색은 잘 되는데 '내 위치' 기능만 안 된다면, macOS의 위치 권한 문제일 확률이 높습니다.</p>
+                        <ol className="list-decimal list-inside font-medium text-xs space-y-1">
+                          <li>시스템 설정 &gt; 개인정보 보호 및 보안 &gt; 위치 서비스</li>
+                          <li>'위치 서비스' 스위치가 켜져 있는지 확인</li>
+                          <li>목록에서 <strong>Mino</strong>(또는 사용하는 브라우저) 앱을 찾아 허용</li>
+                          <li>Mino 앱 재시작</li>
+                        </ol>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
