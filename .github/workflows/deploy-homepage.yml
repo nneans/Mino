@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Mino_Homepage/**'
+      - 'Web/**'
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install and Build 🔧
-        working-directory: ./Mino_Homepage
+        working-directory: ./Web
         run: |
           npm install
           npm run build
@@ -25,5 +25,5 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: Mino_Homepage/dist
+          folder: Web/dist
           branch: gh-pages
