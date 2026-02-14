@@ -270,25 +270,50 @@ function App() {
 
                   <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <span className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm shrink-0">2</span>
-                    보안 경고 해결 (필수)
+                    보안 경고 및 손상 메시지 해결 (필수)
                   </h3>
-                  <div className="ml-9 space-y-4">
+                  <div className="ml-9 space-y-6">
                     <p className="text-gray-600">
-                      앱을 처음 실행할 때 "확인되지 않은 개발자가 배포했기 때문에 열 수 없습니다"라는 경고가 뜰 수 있습니다.
-                      이는 애플의 App Store 외부 앱 정책 때문이며, 아래 순서대로 허용해주시면 됩니다.
+                      Mino는 Apple 공식 인증서로 서명되지 않아, 실행 시 "손상되어 열 수 없습니다" 또는 "확인되지 않은 개발자" 경고가 발생합니다. 아래 방법 중 하나로 해결 가능합니다.
                     </p>
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                      <ol className="list-decimal list-inside space-y-3 text-sm text-gray-700 font-medium">
-                        <li>화면 좌측 상단 <span className="font-bold"> 메뉴 &gt; 시스템 설정 (System Settings)</span>을 엽니다.</li>
-                        <li>좌측 사이드바에서 <strong>개인정보 보호 및 보안 (Privacy & Security)</strong> 탭을 클릭합니다.</li>
-                        <li>스크롤을 아래로 내려 <strong>보안 (Security)</strong> 섹션을 찾습니다.</li>
-                        <li>
-                          "Mino 앱이 차단되었습니다" 메시지 옆의
-                          <span className="inline-block px-2 py-1 bg-gray-100 border border-gray-300 rounded mx-1 text-xs font-bold text-gray-900">확인 없이 열기 (Open Anyway)</span>
-                          버튼을 클릭합니다.
-                        </li>
-                        <li>팝업창이 뜨면 비밀번호나 Touch ID로 승인합니다.</li>
-                      </ol>
+
+                    {/* Method A: Terminal */}
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-gray-900 flex items-center gap-2 text-sm uppercase tracking-wider text-blue-600">
+                        방법 1. 터미널 명령어로 해결 (가장 확실함)
+                      </h4>
+                      <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm relative">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-500 text-xs">Terminal</span>
+                          <Code className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <code className="text-green-400 break-all">
+                          sudo xattr -rd com.apple.quarantine /Applications/Mino.app
+                        </code>
+                      </div>
+                      <p className="text-xs text-gray-400 leading-relaxed italic">
+                        * 터미널 앱 실행 후 위 명령어를 복사/붙여넣기 하고 맥 비밀번호를 입력해주세요. (입력 시 글자가 보이지 않는 것은 정상입니다)
+                      </p>
+                    </div>
+
+                    {/* Method B: GUI */}
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-gray-900 flex items-center gap-2 text-sm uppercase tracking-wider text-blue-600">
+                        방법 2. 시스템 설정에서 허용
+                      </h4>
+                      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <ol className="list-decimal list-inside space-y-3 text-sm text-gray-700 font-medium">
+                          <li>화면 좌측 상단 <span className="font-bold">메뉴 &gt; 시스템 설정 (System Settings)</span>을 엽니다.</li>
+                          <li>좌측 사이드바에서 <strong>개인정보 보호 및 보안 (Privacy & Security)</strong> 탭을 클릭합니다.</li>
+                          <li>스크롤을 아래로 내려 <strong>보안 (Security)</strong> 섹션을 찾습니다.</li>
+                          <li>
+                            "Mino 앱이 차단되었습니다" 메시지 옆의
+                            <span className="inline-block px-2 py-1 bg-gray-100 border border-gray-300 rounded mx-1 text-xs font-bold text-gray-900">확인 없이 열기 (Open Anyway)</span>
+                            버튼을 클릭합니다.
+                          </li>
+                          <li>팝업창이 뜨면 비밀번호나 Touch ID로 승인합니다.</li>
+                        </ol>
+                      </div>
                     </div>
                   </div>
                 </div>
