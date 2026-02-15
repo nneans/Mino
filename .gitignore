@@ -3,10 +3,6 @@
 .env
 *.log
 
-# Mino_Homepage
-Mino_Homepage/node_modules/
-Mino_Homepage/dist/
-
 # App
 App/node_modules/
 App/dist/
@@ -14,10 +10,7 @@ App/release/
 App/out/
 App/electron-builder.yaml
 
-# MMG-Web (old leftover?)
-MMG-Web/
-
-# Backend (if any exists in root or subfolders)
+# Backend
 **/venv/
 **/__pycache__/
 **/*.db
@@ -29,7 +22,7 @@ MMG-Web/
 .agent/
 .gemini/
 
-# Exclude all large files potentially in other places
+# Large files
 *.dmg
 *.zip
 *.node
