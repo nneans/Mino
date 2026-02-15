@@ -32,11 +32,12 @@ async function callLLM(prompt, config) {
     let apiKey = '';
 
     // Priority: If ollama_model is set, use Ollama first
-    if (config.ollama_model) {
-        provider = 'ollama';
-    } else if (config.api_keys && config.api_keys.length > 0) {
+    // Priority: Use provider selected in Settings (api_keys)
+    if (config.api_keys && config.api_keys.length > 0) {
         provider = config.api_keys[0].provider || 'ollama';
         apiKey = config.api_keys[0].key || '';
+    } else if (config.ollama_model) {
+        provider = 'ollama';
     } else {
         provider = config.llm_provider || 'ollama';
         apiKey = config.api_key || '';
@@ -128,18 +129,33 @@ async function analyzeEmail(body, config, referenceDate) {
     let cleanText = body;
     try {
         // Remove style/script blocks first
-        cleanText = cleanText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
-            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ');
-        // Remove tags
+        cleanText = cleanText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
+        // Preserve newlines for structural tags
+        cleanText = cleanText.replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<\/div>/gi, '\n')
+            .replace(/<\/tr>/gi, '\n')
+            .replace(/<\/li>/gi, '\n');
+
+        // Remove remaining tags
         cleanText = cleanText.replace(/<[^>]+>/g, ' ');
-        // Normalize whitespace
-        cleanText = cleanText.replace(/\s+/g, ' ').trim();
+
+        // Decode common entities
+        cleanText = cleanText.replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+
+        // Normalize whitespace (maintain excessive newlines as single newline)
+        cleanText = cleanText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
     } catch (e) {
-        cleanText = body.substring(0, 1000);
+        cleanText = body.substring(0, 1500);
     }
 
-    // Limit length for small models
-    const promptText = cleanText.substring(0, 800);
+    // Limit length (Increased)
+    const promptText = cleanText.substring(0, 1500);
     const dateStr = referenceDate ? new Date(referenceDate).toLocaleString('ko-KR') : new Date().toLocaleString('ko-KR');
 
     const prompt = `You are a financial data parser. Extract transaction details from the email text below and return ONLY valid JSON.
@@ -147,24 +163,44 @@ async function analyzeEmail(body, config, referenceDate) {
 [Context]
 Email Date: ${dateStr} (Use this year/month if missing)
 
+[Examples]
+Input:
+[Web발신]
+케이뱅크(3398)승인
+강*균님
+1,300원
+02/15 13:27
+카페16온스
+출금가능액33,140원
+
+Output:
+{
+    "transaction_date": "2024-02-15 13:27:00",
+    "place": "카페16온스",
+    "amount": 1300,
+    "category": "Cafe",
+    "type": "expense",
+    "raw_text_summary": "케이뱅크 카페16온스 1300원"
+}
+
 [Email Text]
 ${promptText}
 
 [Rules]
 - Place: Shop name (Remove '(주)', 'Inc', branch names). Keep original Korean.
 - Amount: Number only (Remove separators).
-- Date: YYYY-MM-DD HH:MM:SS format.
+- Date: YYYY-MM-DD HH:MM:SS format. If year is missing, use Context year.
 - Category: [Food, Cafe, Shopping, Transport, Bills, Fixed, Transfer, Medical, Exercise, Others]
 - Type: 'expense' (default) or 'income'.
 
 [Output Format]
 {
-    "transaction_date": "2024-01-01 12:00:00",
-    "place": "Starbucks",
-    "amount": 5000,
-    "category": "Cafe",
+    "transaction_date": "YYYY-MM-DD HH:mm:ss",
+    "place": "Store Name",
+    "amount": 10000,
+    "category": "Food",
     "type": "expense",
-    "raw_text_summary": "Summary of transaction..."
+    "raw_text_summary": "Summary..."
 }
 NO markdown, NO explanation. Just JSON.`;
 
