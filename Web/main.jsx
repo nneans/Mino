@@ -366,6 +366,7 @@ function App() {
                         <h4 className="font-bold">Cloud API (권장)</h4>
                       </div>
                       <ul className="text-sm space-y-2 text-gray-600 list-disc list-inside">
+                        <li><strong>Groq (Llama 3)</strong>: <span className="text-blue-600 font-bold">강력 추천!</span> 완전 무료 & 압도적인 속도</li>
                         <li><strong>Google Gemini Pro</strong>: 무료 API 사용 가능 (구글 정책에 따름)</li>
                         <li><strong>OpenAI GPT-4o</strong>: 유료 API Key 필요</li>
                         <li><strong>Anthropic Claude 3.5</strong>: 유료 API Key 필요</li>
