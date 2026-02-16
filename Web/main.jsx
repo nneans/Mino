@@ -71,7 +71,7 @@ function App() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative inline-flex items-center justify-center px-8 py-4 bg-gray-900 overflow-hidden rounded-full font-medium transition-all"
-                onClick={() => window.location.href = "https://github.com/nneans/Mino/releases/download/v2.0.0/Mino.dmg"}
+                onClick={() => window.location.href = "https://github.com/nneans/Mino/releases/latest/download/Mino.dmg"}
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 <div className="relative flex items-center gap-3 text-white">

@@ -481,12 +481,80 @@ function expenseExistsByMessageId(messageId) {
     return !!stmt.get(messageId);
 }
 
+function getMonthlyStats(year, month) {
+    const yearStr = year.toString();
+    const monthStr = month.toString().padStart(2, '0');
+    // Using strftime to extract YYYY-MM
+    const target = `${yearStr}-${monthStr}`;
+
+    try {
+        const stmt = db.prepare(`SELECT type, SUM(amount) as total FROM expenses WHERE strftime('%Y-%m', transaction_date) = ? GROUP BY type`);
+        const rows = stmt.all(target);
+
+        let stats = { income: 0, expense: 0 };
+        if (rows) {
+            for (const row of rows) {
+                if (row.type === 'income') stats.income = row.total || 0;
+                else stats.expense = row.total || 0;
+            }
+        }
+        return stats;
+    } catch (e) {
+        return { income: 0, expense: 0 };
+    }
+}
+
+function getMonthlyCategoryStats(year, month) {
+    const yearStr = year.toString();
+    const monthStr = month.toString().padStart(2, '0');
+    const target = `${yearStr}-${monthStr}`;
+
+    try {
+        const stmt = db.prepare(`
+            SELECT category, SUM(amount) as total 
+            FROM expenses 
+            WHERE strftime('%Y-%m', transaction_date) = ? AND type = 'expense'
+            GROUP BY category
+            ORDER BY total DESC
+        `);
+        const rows = stmt.all(target);
+
+        const stats = {};
+        for (const row of rows) {
+            stats[row.category] = row.total;
+        }
+        return stats;
+    } catch (e) {
+        return {};
+    }
+}
+
+function getFixedExpenses() {
+    try {
+        // Get expenses marked as fixed OR in 'Fixed' category
+        // Limit to distinctive ones? For now, list distinct places
+        const stmt = db.prepare(`
+            SELECT DISTINCT place, amount, category 
+            FROM expenses 
+            WHERE is_fixed = 1 OR category = 'Fixed'
+            GROUP BY place
+            ORDER BY amount DESC
+        `);
+        return stmt.all();
+    } catch (e) {
+        return [];
+    }
+}
+
 module.exports = {
     init,
     getDb,
     close,
     // Expenses
     getAllExpenses,
+    getMonthlyStats,
+    getMonthlyCategoryStats,
+    getFixedExpenses,
     addExpense,
     updateExpense,
     deleteExpense,

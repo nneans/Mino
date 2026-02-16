@@ -121,9 +121,6 @@ async function callLLM(prompt, config) {
 /**
  * Analyze a single email body using LLM
  */
-/**
- * Analyze a single email body using LLM
- */
 async function analyzeEmail(body, config, referenceDate) {
     // 1. Clean HTML tags to fallback to text
     let cleanText = body;
@@ -234,9 +231,6 @@ NO markdown, NO explanation. Just JSON.`;
 
 /**
  * Fetch emails from Gmail via IMAP
- */
-/**
- * Fetch emails from Gmail via IMAP
  * Uses simpleParser for robust parsing of headers and body
  */
 function fetchEmails(config, days = 7) {
@@ -340,9 +334,13 @@ function cancelSync() {
     isCancelled = true;
 }
 
-async function syncGmail(window) {
+async function syncGmail(window, options = {}) {
     const config = configService.getConfig();
     isCancelled = false; // Reset cancellation state
+
+    // Use days from options (default to 7)
+    // Front-end should send { days: 1 } for "Today"
+    const daysToSync = options.days || 7;
 
     // Status helper
     const sendStatus = (data) => {
@@ -352,12 +350,12 @@ async function syncGmail(window) {
     };
 
     try {
-        sendStatus({ type: 'status', message: '📧 Gmail 연결 중...', step: 'connecting' });
+        sendStatus({ type: 'status', message: `📧 Gmail 연결 중... (${daysToSync}일)`, step: 'connecting' });
 
         // Check cancellation
         if (isCancelled) { throw new Error('작업이 취소되었습니다.'); }
 
-        const rawEmails = await fetchEmails(config, 7);
+        const rawEmails = await fetchEmails(config, daysToSync);
 
         // Check cancellation
         if (isCancelled) { throw new Error('작업이 취소되었습니다.'); }

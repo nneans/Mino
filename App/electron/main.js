@@ -10,7 +10,7 @@ const fs = require('fs');
 const database = require('./database');
 const configService = require('./config');
 const services = require('./services');
-const { EXPENSE_CATEGORIES, INCOME_CATEGORIES, validateExpenseData } = require('./constants');
+const { EXPENSE_CATEGORIES, INCOME_CATEGORIES, CATEGORY_KR, validateExpenseData } = require('./constants');
 
 // CRASH LOGGING
 process.on('uncaughtException', (error) => {
@@ -166,7 +166,7 @@ function setupIpcHandlers() {
     ipcMain.handle('sync:gmail', async (event, options) => {
         // Use window associated with event sender for progress updates
         const win = BrowserWindow.fromWebContents(event.sender);
-        return services.syncGmail(win);
+        return services.syncGmail(win, options); // Pass options (days) to service
     });
 
     // ============ OLLAMA ============
@@ -198,7 +198,8 @@ function setupIpcHandlers() {
     // ============ CHAT ============
     ipcMain.handle('chat:send', async (event, message, model, provider, apiKey) => {
         try {
-            const config = configService.getConfig();
+            // Get Config First
+            let config = configService.getConfig();
 
             // Override config if specific params provided
             if (model) config.ollama_model = model;
@@ -208,7 +209,95 @@ function setupIpcHandlers() {
                 config.api_keys.unshift({ provider, key: apiKey });
             }
 
-            const response = await services.callLLM(message, config);
+            // Context Injection
+            let context = "";
+            try {
+                // 1. Calculate Monthly Stats
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+
+                const stats = database.getMonthlyStats(year, month);
+                const catStats = database.getMonthlyCategoryStats(year, month);
+                const fixedExpenses = database.getFixedExpenses(); // From DB (detected)
+
+                const budget = config.budget || 0;
+                const totalSpent = stats.expense || 0;
+                const totalIncome = stats.income || 0;
+                const remaining = budget - totalSpent;
+
+                // 2. Build Summary Context
+                context += `[${month}월 상세 재정 현황 보고]\n`;
+                context += `1. 예산 현황:\n`;
+                context += `   - 설정된 예산: ${budget.toLocaleString()}원\n`;
+                context += `   - 총 수입: ${totalIncome.toLocaleString()}원\n`;
+                context += `   - 총 지출: ${totalSpent.toLocaleString()}원\n`;
+                context += `   - 남은 예산(잔액): ${remaining.toLocaleString()}원\n\n`;
+
+                context += `2. 유형별 지출 분석 (정확한 집계):\n`;
+                if (Object.keys(catStats).length > 0) {
+                    Object.entries(catStats).forEach(([cat, amount]) => {
+                        const label = CATEGORY_KR[cat] || cat;
+                        context += `   - ${label}: ${amount.toLocaleString()}원\n`;
+                    });
+                } else {
+                    context += `   - 지출 내역 없음\n`;
+                }
+                context += `\n`;
+
+                context += `3. 고정 지출 정보:\n`;
+
+                // Dashboard Fixed Expenses
+                if (config.fixed_expenses && config.fixed_expenses.length > 0) {
+                    context += `   [사용자가 설정한 고정 지출 (Dashboard)]\n`;
+                    config.fixed_expenses.filter(fe => fe.type !== 'income').forEach(fe => {
+                        const day = fe.day ? `매월 ${fe.day}일` : '매월';
+                        const amount = fe.amount ? fe.amount.toLocaleString() : '변동/미정';
+                        context += `   - ${fe.name} (${day}): ${amount}원\n`;
+                    });
+                    context += `\n`;
+                }
+
+                // Detected Fixed Expenses (optional, might duplicate)
+                if (fixedExpenses && fixedExpenses.length > 0) {
+                    context += `   [거래 내역에서 감지된 고정 지출/공과금]\n`;
+                    fixedExpenses.forEach(fe => {
+                        context += `   - ${fe.place}: ${fe.amount.toLocaleString()}원 (${CATEGORY_KR[fe.category] || fe.category})\n`;
+                    });
+                    context += `\n`;
+                }
+
+                // 3. Add Transaction History
+                const expenses = database.getAllExpenses(50);
+                if (expenses && expenses.length > 0) {
+                    context += "[참고: 최근 30건 거래 내역]\n";
+                    expenses.slice(0, 30).forEach(e => {
+                        const date = e.transaction_date ? e.transaction_date.slice(0, 10) : '';
+                        const amount = e.amount ? e.amount.toLocaleString() : 0;
+                        // Keep it simple for compatibility
+                        const typeStr = e.type === 'income' ? '(수입)' : '(지출)';
+                        context += `- ${date} ${typeStr} ${e.place}: ${amount}원 (${e.category})\n`;
+                    });
+                }
+            } catch (e) {
+                console.error("Context fetch error:", e);
+                context += "데이터를 불러오는 중 오류가 발생했습니다.\n";
+            }
+
+            const sysPrompt = `System: 당신은 사용자의 개인 자산 비서 'Mino'입니다. 
+아래 완벽하게 정리된 [상세 재정 현황 보고] 데이터를 기반으로 답변하세요.
+절대로! 스스로 지출 합계를 다시 계산하지 마세요. 이미 계산된 '총 지출'과 '유형별 지출 분석' 수치를 그대로 인용해야 합니다.
+사용자가 '분석해줘'라고 하면, 위 '2. 유형별 지출 분석'의 수치를 정리해서 말해주세요.
+고정지출에 대한 질문이 있으면 '3. 고정 지출 정보' (사용자 설정값 및 감지된 내역)을 참고하세요.
+
+절대 한자(漢字)를 섞어 쓰지 마세요. 오직 한국어(한글)로만 답변하세요.
+화폐 단위는 원(KRW)입니다.
+
+${context}
+
+User: ${message}`;
+
+            const response = await services.callLLM(sysPrompt, config);
             if (response) {
                 return { status: 'success', response };
             } else {
