@@ -1,7 +1,7 @@
 {
   "name": "mino",
   "productName": "Mino",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Personal Finance Manager - AI-powered expense tracker (IPC Mode)",
   "author": "nneans33@gmail.com",
   "main": "electron/main.js",

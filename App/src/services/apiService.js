@@ -1,5 +1,5 @@
 import { API_URL } from '../utils/constants'
-import { DEMO_EXPENSES, DEMO_CONFIG, DEMO_CHAT_RESPONSES } from '../data/mockData';
+import { DEMO_EXPENSES, DEMO_CONFIG, DEMO_CHAT_RESPONSES, DEMO_GOALS, DEMO_GRAPH_DATA } from '../data/mockData';
 
 // Demo Mode State
 let isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
@@ -177,9 +177,7 @@ export const expenseService = {
 // ============================================
 export const goalService = {
     getAll: async () => {
-        if (isDemoMode) return [
-            { id: 1, name: '여행 자금', target_amount: 1000000, current_amount: 300000, icon: '✈️' }
-        ];
+        if (isDemoMode) return [...DEMO_GOALS];
         if (isElectronIPC()) {
             return window.electronAPI.db.getGoals();
         }
@@ -341,7 +339,7 @@ export const aiService = {
     },
 
     getGraph: async () => {
-        if (isDemoMode) return { nodes: [], edges: [] };
+        if (isDemoMode) return DEMO_GRAPH_DATA;
         if (isElectronIPC()) {
             return window.electronAPI.graph.getData();
         }

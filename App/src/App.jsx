@@ -438,7 +438,7 @@ function App() {
           fontSize: '0.85rem',
           fontWeight: 500
         }}>
-          🎮 Demo Mode - 샘플 데이터로 체험 중 | <a href="https://github.com/nneans/mino-v4" target="_blank" rel="noreferrer" style={{ color: 'white', textDecoration: 'underline' }}>GitHub</a>
+          🎮 Demo Mode — 샘플 데이터로 체험 중 | <a href="https://github.com/nneans/Mino" target="_blank" rel="noreferrer" style={{ color: 'white', textDecoration: 'underline' }}>GitHub</a>
         </div>
       )}
 
@@ -468,7 +468,7 @@ function App() {
       <SyncModal isOpen={showSyncModal} onClose={() => setShowSyncModal(false)} onComplete={refreshExpenses} />
       {showBudgetModal && <BudgetModal config={config} onClose={() => setShowBudgetModal(false)} onSave={async (newConfig) => { const res = await saveConfig(newConfig); if (res.success) setConfig(newConfig); setShowBudgetModal(false); }} />}
       <footer className="app-footer">
-        <p>© 2025 Mino. All rights reserved.</p>
+        <p>© 2026 Mino. All rights reserved.</p>
         <p className="footer-subtitle">AI-Powered Personal Finance Management</p>
         <p className="footer-dev">Developer: nneans33@gmail.com</p>
       </footer>
