@@ -9,11 +9,11 @@ import screen4 from './assets/screen4.png';
 import screen5 from './assets/screen5.png';
 
 const screenshots = [
-  { src: screen1, title: '한눈에 파악하는 나의 재정 현황', desc: '대시보드에서 수입, 지출, 저축 목표를 한눈에 관리하세요.' },
-  { src: screen2, title: '터치 한 번으로 끝나는 스마트한 지출 동기화', desc: 'Gmail과 연동하여 카드 결제 내역을 자동으로 가져옵니다.' },
-  { src: screen3, title: '나보다 더 나를 잘 아는 인공지능 소비 분석', desc: 'AI가 사용자님의 소비 패턴을 분석하고 맞춤형 리포트를 제공합니다.' },
-  { src: screen4, title: '차트로 확인하는 월간/연간 재정 리포트', desc: '정확한 수치와 차트로 재정 흐름을 직관적으로 파악하세요.' },
-  { src: screen5, title: '무엇이든 물어보세요, 개인 금융 비서 Mino', desc: 'LLM 기반 AI가 사용자님의 지출과 목표를 반영하여 답변합니다.' },
+  { src: screen1, title: '대시보드', desc: '대시보드에서 수입, 지출, 저축 목표를 한눈에 관리하세요.' },
+  { src: screen2, title: '지출 동기화', desc: 'Gmail과 연동하여 카드 결제 내역을 자동으로 가져옵니다.' },
+  { src: screen3, title: '인사이트', desc: 'AI가 사용자님의 소비 패턴을 분석하고 맞춤형 리포트를 제공합니다.' },
+  { src: screen4, title: '재정 리포트', desc: '정확한 수치와 차트로 재정 흐름을 직관적으로 파악하세요.' },
+  { src: screen5, title: 'LLM', desc: 'LLM 기반 AI가 사용자님의 지출과 목표를 반영하여 답변합니다.' },
 ];
 
 function App() {
