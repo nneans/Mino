@@ -341,6 +341,39 @@ User: ${message}`;
         }
     });
 
+    // ============ GOALS ============
+    ipcMain.handle('db:goals:getAll', () => {
+        try {
+            return database.getAllGoals();
+        } catch (e) {
+            return [];
+        }
+    });
+
+    ipcMain.handle('db:goals:add', (event, goal) => {
+        try {
+            return database.addGoal(goal);
+        } catch (e) {
+            return { status: 'error', message: e.message };
+        }
+    });
+
+    ipcMain.handle('db:goals:update', (event, id, goal) => {
+        try {
+            return database.updateGoal(id, goal);
+        } catch (e) {
+            return { status: 'error', message: e.message };
+        }
+    });
+
+    ipcMain.handle('db:goals:delete', (event, id) => {
+        try {
+            return database.deleteGoal(id);
+        } catch (e) {
+            return { status: 'error', message: e.message };
+        }
+    });
+
     console.log('IPC handlers registered');
 }
 

@@ -96,7 +96,8 @@ function createTables() {
             type TEXT DEFAULT 'expense',
             normalized_place TEXT,
             is_fixed INTEGER DEFAULT 0,
-            email_message_id TEXT
+            email_message_id TEXT,
+            goal_id INTEGER
         )
     `);
 
@@ -155,6 +156,21 @@ function createTables() {
             value TEXT
         )
     `);
+
+    // Goals table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS goals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            target_amount INTEGER NOT NULL,
+            current_amount INTEGER DEFAULT 0,
+            start_date TEXT,
+            deadline TEXT,
+            icon TEXT,
+            status TEXT DEFAULT 'active',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }
 
 function runMigrations() {
@@ -164,7 +180,10 @@ function runMigrations() {
         'ALTER TABLE expenses ADD COLUMN location TEXT',
         'ALTER TABLE expenses ADD COLUMN is_fixed INTEGER DEFAULT 0',
         'ALTER TABLE expenses ADD COLUMN normalized_place TEXT',
-        'ALTER TABLE expenses ADD COLUMN email_message_id TEXT'
+        'ALTER TABLE expenses ADD COLUMN normalized_place TEXT',
+        'ALTER TABLE expenses ADD COLUMN email_message_id TEXT',
+        'ALTER TABLE expenses ADD COLUMN goal_id INTEGER',
+        'ALTER TABLE goals ADD COLUMN start_date TEXT'
     ];
 
     for (const sql of migrations) {
@@ -175,7 +194,6 @@ function runMigrations() {
         }
     }
 }
-
 function initializeDefaults() {
     const now = new Date().toISOString();
     const stmt = db.prepare('INSERT OR IGNORE INTO api_usage (api_name, request_count, last_reset) VALUES (?, ?, ?)');
@@ -217,8 +235,8 @@ function addExpense(data) {
         INSERT INTO expenses (
             transaction_date, place, normalized_place, location, amount, 
             category, source, latitude, longitude, type, is_fixed, email_message_id,
-            raw_text, analysis_data
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            raw_text, analysis_data, goal_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const normalizedPlace = normalizeMerchantName(data.place);
@@ -238,8 +256,20 @@ function addExpense(data) {
         data.is_fixed || 0,
         data.email_message_id || null,
         data.raw_text || data.raw_text_summary || '',
-        analysisJson
+        analysisJson,
+        data.goal_id || null
     );
+
+    // Automatically update goal amount if type is saving and goal_id is present
+    if (data.type === 'saving' && data.goal_id) {
+        try {
+            const goalId = parseInt(data.goal_id);
+            const amount = parseInt(data.amount);
+            db.prepare('UPDATE goals SET current_amount = current_amount + ? WHERE id = ?').run(amount, goalId);
+        } catch (e) {
+            console.error('Failed to update linked goal:', e);
+        }
+    }
 
     return { success: true, id: result.lastInsertRowid };
 }
@@ -296,6 +326,14 @@ function deleteExpense(id) {
 
     const stmt = db.prepare('DELETE FROM expenses WHERE id=?');
     stmt.run(id);
+
+    // If it was a saving, revert the goal amount
+    if (existing && existing.type === 'saving' && existing.goal_id) {
+        try {
+            db.prepare('UPDATE goals SET current_amount = current_amount - ? WHERE id = ?').run(existing.amount, existing.goal_id);
+        } catch (e) { console.error('Failed to revert goal amount', e) }
+    }
+
     return { success: true };
 }
 
@@ -546,6 +584,55 @@ function getFixedExpenses() {
     }
 }
 
+// ============================================
+// GOALS
+// ============================================
+function getAllGoals() {
+    const stmt = db.prepare('SELECT * FROM goals ORDER BY created_at DESC');
+    return stmt.all();
+}
+
+function addGoal(goal) {
+    const stmt = db.prepare(`
+        INSERT INTO goals (name, target_amount, current_amount, start_date, deadline, icon, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(
+        goal.name,
+        parseInt(goal.target_amount),
+        parseInt(goal.current_amount || 0),
+        goal.start_date || new Date().toISOString().slice(0, 10),
+        goal.deadline || null,
+        goal.icon || '💰',
+        goal.status || 'active'
+    );
+    return { success: true, id: result.lastInsertRowid };
+}
+
+function updateGoal(id, goal) {
+    const stmt = db.prepare(`
+        UPDATE goals SET name=?, target_amount=?, current_amount=?, start_date=?, deadline=?, icon=?, status=?
+        WHERE id=?
+    `);
+    stmt.run(
+        goal.name,
+        parseInt(goal.target_amount),
+        parseInt(goal.current_amount || 0),
+        goal.start_date || null,
+        goal.deadline || null,
+        goal.icon || '💰',
+        goal.status || 'active',
+        id
+    );
+    return { success: true };
+}
+
+function deleteGoal(id) {
+    const stmt = db.prepare('DELETE FROM goals WHERE id=?');
+    stmt.run(id);
+    return { success: true };
+}
+
 module.exports = {
     init,
     getDb,
@@ -572,6 +659,11 @@ module.exports = {
     // Graph
     getGraphData,
     updateGraph,
+    // Goals
+    getAllGoals,
+    addGoal,
+    updateGoal,
+    deleteGoal,
     // API Usage
     getApiUsage,
     incrementApiUsage,

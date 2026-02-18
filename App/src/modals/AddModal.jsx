@@ -2,6 +2,7 @@
 import './Modals.css'
 import { useState, useEffect } from 'react'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../utils/constants'
+import { goalService } from '../services/apiService'
 
 export default function AddModal({
     isOpen, onClose, form, setForm, onSave, onSearch
@@ -12,6 +13,13 @@ export default function AddModal({
     const [locationKeyword, setLocationKeyword] = useState('')
     const [userLocation, setUserLocation] = useState(null)
     const [searchLoading, setSearchLoading] = useState(false)
+    const [goals, setGoals] = useState([])
+
+    useEffect(() => {
+        if (isOpen) {
+            goalService.getAll().then(data => setGoals(data || []))
+        }
+    }, [isOpen])
 
     // Get user's current location on mount
     useEffect(() => {
@@ -109,16 +117,29 @@ export default function AddModal({
                         <button
                             type="button"
                             className={`type-btn ${form.type === 'expense' ? 'active expense' : ''}`}
-                            onClick={() => setForm({ ...form, type: 'expense', category: 'Food' })}
+                            onClick={() => setForm({ ...form, type: 'expense', category: 'Food', goal_id: null })}
                         >
                             지출
                         </button>
                         <button
                             type="button"
                             className={`type-btn ${form.type === 'income' ? 'active income' : ''}`}
-                            onClick={() => setForm({ ...form, type: 'income', category: 'Salary' })}
+                            onClick={() => setForm({ ...form, type: 'income', category: 'Salary', goal_id: null })}
                         >
                             수입
+                        </button>
+                        <button
+                            type="button"
+                            className={`type-btn ${form.type === 'saving' ? 'active saving' : ''}`}
+                            onClick={() => setForm({
+                                ...form,
+                                type: 'saving',
+                                category: 'Saving',
+                                goal_id: goals[0]?.id || null,
+                                place: goals.length > 0 ? goals[0].name : '저축'
+                            })}
+                        >
+                            저축
                         </button>
                     </div>
                 </div>
@@ -167,47 +188,51 @@ export default function AddModal({
                 </div>
 
                 {/* Place/Content - Simple input without search */}
-                <div className="form-group">
-                    <label>상호명 / 내용</label>
-                    <input
-                        type="text"
-                        placeholder="상호명 또는 지출 내용을 입력하세요"
-                        value={form.place}
-                        onChange={e => setForm({ ...form, place: e.target.value })}
-                    />
-                </div>
-
-                {/* Location Search - Separate section */}
-                <div className="form-group">
-                    <label>
-                        위치 검색
-                        <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', marginLeft: '6px' }}>
-                            (선택사항)
-                        </span>
-                        {userLocation && (
-                            <span style={{ fontSize: '0.65rem', color: '#10b981', marginLeft: '8px' }}>
-                                📍 현재 위치 기반 정렬
-                            </span>
-                        )}
-                    </label>
-                    <div className="input-group">
+                {form.type !== 'saving' && (
+                    <div className="form-group">
+                        <label>상호명 / 내용</label>
                         <input
                             type="text"
-                            placeholder="장소명으로 검색 (예: 스타벅스, GS25)"
-                            value={locationKeyword}
-                            onChange={e => setLocationKeyword(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleLocationSearch()}
+                            placeholder="상호명 또는 지출 내용을 입력하세요"
+                            value={form.place}
+                            onChange={e => setForm({ ...form, place: e.target.value })}
                         />
-                        <button
-                            type="button"
-                            className="btn-search"
-                            onClick={handleLocationSearch}
-                            disabled={searchLoading}
-                        >
-                            {searchLoading ? '...' : '검색'}
-                        </button>
                     </div>
-                </div>
+                )}
+
+                {/* Location Search - Separate section */}
+                {form.type !== 'saving' && (
+                    <div className="form-group">
+                        <label>
+                            위치 검색
+                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal', marginLeft: '6px' }}>
+                                (선택사항)
+                            </span>
+                            {userLocation && (
+                                <span style={{ fontSize: '0.65rem', color: '#10b981', marginLeft: '8px' }}>
+                                    📍 현재 위치 기반 정렬
+                                </span>
+                            )}
+                        </label>
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                placeholder="장소명으로 검색 (예: 스타벅스, GS25)"
+                                value={locationKeyword}
+                                onChange={e => setLocationKeyword(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleLocationSearch()}
+                            />
+                            <button
+                                type="button"
+                                className="btn-search"
+                                onClick={handleLocationSearch}
+                                disabled={searchLoading}
+                            >
+                                {searchLoading ? '...' : '검색'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Search Results */}
                 {searchResults.length > 0 && (
@@ -252,7 +277,7 @@ export default function AddModal({
                 )}
 
                 {/* Selected Location Display */}
-                {form.location && (
+                {form.location && form.type !== 'saving' && (
                     <div className="form-group">
                         <label>선택된 위치</label>
                         <div style={{
@@ -282,6 +307,29 @@ export default function AddModal({
                     </div>
                 )}
 
+                {/* Goal Selection for Saving Type */}
+                {form.type === 'saving' && (
+                    <div className="form-group">
+                        <label>저축 목표 선택</label>
+                        <select
+                            value={form.goal_id || ''}
+                            onChange={e => {
+                                const gId = parseInt(e.target.value);
+                                const g = goals.find(x => x.id === gId);
+                                setForm({ ...form, goal_id: gId, place: g ? g.name : '저축' });
+                            }}
+                        >
+                            {goals.length > 0 ? (
+                                goals.map(g => (
+                                    <option key={g.id} value={g.id}>{g.name}</option>
+                                ))
+                            ) : (
+                                <option value="">목표 없음 (대시보드에서 추가하세요)</option>
+                            )}
+                        </select>
+                    </div>
+                )}
+
                 {/* Amount & Category */}
                 <div className="form-row">
                     <div className="form-group">
@@ -293,17 +341,19 @@ export default function AddModal({
                             onChange={e => setForm({ ...form, amount: e.target.value })}
                         />
                     </div>
-                    <div className="form-group">
-                        <label>분류</label>
-                        <select
-                            value={form.category}
-                            onChange={e => setForm({ ...form, category: e.target.value })}
-                        >
-                            {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {form.type !== 'saving' && (
+                        <div className="form-group">
+                            <label>분류</label>
+                            <select
+                                value={form.category}
+                                onChange={e => setForm({ ...form, category: e.target.value })}
+                            >
+                                {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 </div>
 
 

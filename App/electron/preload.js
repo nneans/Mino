@@ -25,6 +25,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
         // Categories
         getCategories: () => ipcRenderer.invoke('db:categories:getAll'),
+
+        // Goals
+        getGoals: () => ipcRenderer.invoke('db:goals:getAll'),
+        addGoal: (goal) => ipcRenderer.invoke('db:goals:add', goal),
+        updateGoal: (id, goal) => ipcRenderer.invoke('db:goals:update', id, goal),
+        deleteGoal: (id) => ipcRenderer.invoke('db:goals:delete', id),
     },
 
     // Config operations

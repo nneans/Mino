@@ -14,10 +14,12 @@
     "preview": "vite preview",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "npm run build && electron-builder --mac",
+    "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:demo": "npm run build:demo && electron-builder --mac --config.productName='Mino Demo' --config.appId='com.mino.demo'"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
+    "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.26",
     "imap": "^0.8.19",
@@ -67,6 +69,10 @@
         "zip"
       ],
       "icon": "electron/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icon.ico"
     }
   }
 }

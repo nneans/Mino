@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react'
-import logo from './assets/logo.png'
+import icon from './assets/logo.png' // Utilizing existing logo import or use the electron icon if preferred.
+// Actually, earlier I saw logo import at line 2. Let's check line 2.
+// Line 2: import logo from './assets/logo.png'
+// The user asked to use electron/icon.png. I moved it to src/assets/icon.png.
+// So let's import that.
+
+import appIcon from './assets/icon.png'
 import 'leaflet/dist/leaflet.css'
 import './styles/variables.css'
 import './styles/reset.css'
@@ -404,7 +410,7 @@ function App() {
       <header className="app-header">
         <div className="header-left">
           <div className="logo" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => setActiveTab('DASHBOARD')}>
-            <img src={logo} alt="Mino" style={{ width: '28px', height: '28px', borderRadius: '6px', marginRight: '8px' }} />
+            <img src={appIcon} alt="Mino" style={{ width: '28px', height: '28px', borderRadius: '6px', marginRight: '8px' }} />
             <span className="logo-text">Mino</span>
           </div>
         </div>

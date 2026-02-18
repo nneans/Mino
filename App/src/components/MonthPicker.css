@@ -57,6 +57,7 @@
     transform: none;
     width: 260px;
     margin-top: 8px;
+    z-index: 9999;
 }
 
 .month-picker-popover.mini.left {

@@ -35,7 +35,7 @@ function App() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img src={logo} alt="Mino" className="w-8 h-8 rounded-lg" />
-            Mino
+            <span className="text-blue-500">Mino</span>
           </div>
           <div className="flex items-center gap-6 text-sm font-medium text-gray-500">
             <button onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })} className="hover:text-blue-600 transition-colors">기능 소개</button>
@@ -60,7 +60,7 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight break-keep">
+            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-blue-500 mb-6 leading-tight break-keep">
               Mino
             </h1>
             <p className="text-xl text-gray-500 mb-10 leading-relaxed font-medium break-keep">
@@ -80,7 +80,7 @@ function App() {
                 </div>
               </motion.button>
             </div>
-            <p className="mt-4 text-sm text-gray-400">macOS 12.0 Monterey 이상 지원 (Apple Silicon 권장)</p>
+
           </motion.div>
         </div>
       </section>

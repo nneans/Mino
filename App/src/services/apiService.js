@@ -173,6 +173,45 @@ export const expenseService = {
 }
 
 // ============================================
+// GOAL SERVICE
+// ============================================
+export const goalService = {
+    getAll: async () => {
+        if (isDemoMode) return [
+            { id: 1, name: '여행 자금', target_amount: 1000000, current_amount: 300000, icon: '✈️' }
+        ];
+        if (isElectronIPC()) {
+            return window.electronAPI.db.getGoals();
+        }
+        return apiFetch('/goals');
+    },
+
+    add: async (goal) => {
+        if (isDemoMode) return { success: true };
+        if (isElectronIPC()) {
+            return window.electronAPI.db.addGoal(goal);
+        }
+        return apiFetch('/goals', { method: 'POST', body: JSON.stringify(goal) });
+    },
+
+    update: async (id, goal) => {
+        if (isDemoMode) return { success: true };
+        if (isElectronIPC()) {
+            return window.electronAPI.db.updateGoal(id, goal);
+        }
+        return apiFetch(`/goals/${id}`, { method: 'PUT', body: JSON.stringify(goal) });
+    },
+
+    delete: async (id) => {
+        if (isDemoMode) return { success: true };
+        if (isElectronIPC()) {
+            return window.electronAPI.db.deleteGoal(id);
+        }
+        return apiFetch(`/goals/${id}`, { method: 'DELETE' });
+    },
+}
+
+// ============================================
 // CONFIG SERVICE
 // ============================================
 export const configService = {

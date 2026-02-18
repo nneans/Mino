@@ -3,6 +3,8 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { SpendingChart } from '../components/Charts'
 import CalendarWidget from '../components/Calendar'
 import FixedExpenseModal from '../modals/FixedExpenseModal'
+import GoalModal from '../modals/GoalModal'
+import { goalService } from '../services/apiService'
 import { Skeleton } from '../components/Skeleton'
 import { motion } from 'framer-motion'
 import { useAlert } from '../contexts'
@@ -32,6 +34,35 @@ export default function DashboardTab({ expenses, config, setConfig, saveConfig, 
 
     // Alert Context
     const { showAlert } = useAlert()
+
+    // GOALS STATE
+    const [goals, setGoals] = useState([])
+    const [showGoalModal, setShowGoalModal] = useState(false)
+    const [editingGoal, setEditingGoal] = useState(null)
+
+    const fetchGoals = async () => {
+        try {
+            const data = await goalService.getAll()
+            setGoals(data || [])
+        } catch (e) { }
+    }
+
+    useEffect(() => {
+        fetchGoals()
+    }, [])
+
+    const handleSaveGoal = async (goal) => {
+        if (goal.id) await goalService.update(goal.id, goal)
+        else await goalService.add(goal)
+        setShowGoalModal(false)
+        fetchGoals()
+    }
+
+    const handleGoalDelete = async (id) => {
+        await goalService.delete(id)
+        setShowGoalModal(false)
+        fetchGoals()
+    }
 
     // Month Navigation State (Default: Today's month)
     const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -227,6 +258,14 @@ export default function DashboardTab({ expenses, config, setConfig, saveConfig, 
                 />
             )}
 
+            <GoalModal
+                isOpen={showGoalModal}
+                onClose={() => setShowGoalModal(false)}
+                onSave={handleSaveGoal}
+                onDelete={handleGoalDelete}
+                goal={editingGoal}
+            />
+
             <div className="month-navigator" ref={pickerRef} style={{ position: 'relative' }}>
                 <button className="month-nav-btn" onClick={handlePrevMonth} aria-label="이전 달">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -270,13 +309,47 @@ export default function DashboardTab({ expenses, config, setConfig, saveConfig, 
 
             <div className="stats-row">
                 <div className="stat-card">
-                    <span className="stat-label">총 지출</span>
-                    <span className="stat-value expense">{currentStats.totalExpense.toLocaleString()}원</span>
+                    <div className="stat-header">
+                        <span className="stat-label">총 수입 / 총 지출</span>
+                    </div>
+                    <div className="fixed-stat-grid">
+                        <div className="fs-row">
+                            <span className="fs-label">총 수입</span>
+                            <span className="fs-val inc">+{currentStats.totalIncome.toLocaleString()}</span>
+                        </div>
+                        <div className="fs-divider"></div>
+                        <div className="fs-row">
+                            <span className="fs-label">총 지출</span>
+                            <span className="fs-val exp">-{currentStats.totalExpense.toLocaleString()}</span>
+                        </div>
+                    </div>
                 </div>
+
+
                 <div className="stat-card">
-                    <span className="stat-label">총 수입</span>
-                    <span className="stat-value income">{currentStats.totalIncome.toLocaleString()}원</span>
+                    <div className="stat-header">
+                        <span className="stat-label">고정 비용</span>
+                        <button className="btn-icon-mini" onClick={() => setIsEditingFixed(true)}>✏️</button>
+                    </div>
+                    <div className="fixed-stat-grid">
+                        <div className="fs-row">
+                            <span className="fs-label">고정 수입</span>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <span className="fs-val inc">+{fixedEstimates.inc.toLocaleString()}</span>
+                                {fixedEstimates.hasVariableInc && <span className="fs-alpha">+α</span>}
+                            </div>
+                        </div>
+                        <div className="fs-divider"></div>
+                        <div className="fs-row">
+                            <span className="fs-label">고정 지출</span>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <span className="fs-val exp">-{fixedEstimates.exp.toLocaleString()}</span>
+                                {fixedEstimates.hasVariableExp && <span className="fs-alpha">+α</span>}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div className="stat-card">
                     <div className="stat-header">
                         <span className="stat-label">잔여 예산</span>
@@ -300,29 +373,6 @@ export default function DashboardTab({ expenses, config, setConfig, saveConfig, 
                         </div>
                     </div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <span className="stat-label">고정 비용</span>
-                        <button className="btn-icon-mini" onClick={() => setIsEditingFixed(true)}>✏️</button>
-                    </div>
-                    <div className="fixed-stat-grid">
-                        <div className="fs-row">
-                            <span className="fs-label">고정 지출</span>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span className="fs-val exp">-{fixedEstimates.exp.toLocaleString()}</span>
-                                {fixedEstimates.hasVariableExp && <span className="fs-alpha">+α</span>}
-                            </div>
-                        </div>
-                        <div className="fs-divider"></div>
-                        <div className="fs-row">
-                            <span className="fs-label">고정 수입</span>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span className="fs-val inc">+{fixedEstimates.inc.toLocaleString()}</span>
-                                {fixedEstimates.hasVariableInc && <span className="fs-alpha">+α</span>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div className="stat-card comparison">
                     <span className="stat-label">전월 대비</span>
                     <div className="comparison-content">
@@ -334,6 +384,42 @@ export default function DashboardTab({ expenses, config, setConfig, saveConfig, 
                         </span>
                     </div>
                     <span className="comparison-prev">전월: {monthComparison.prevTotal.toLocaleString()}원</span>
+                </div>
+
+                {/* GOALS WIDGET (Moved to right) */}
+                <div className="stat-card goals-widget">
+                    <div className="stat-header" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                        <span className="stat-label">저축 목표</span>
+                        <button className="btn-icon-mini" onClick={() => { setEditingGoal(null); setShowGoalModal(true) }}>✏️</button>
+                    </div>
+                    <div className="goals-mini-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '60px', overflowY: 'auto', paddingRight: '4px' }}>
+                        {goals.filter(g => (g.current_amount || 0) < g.target_amount).length > 0 ? goals.filter(g => (g.current_amount || 0) < g.target_amount).map(g => {
+                            const percent = g.target_amount > 0 ? Math.round((g.current_amount / g.target_amount) * 100) : 0
+                            const percentColor = percent < 30 ? '#ef4444' : percent < 70 ? '#f59e0b' : '#10b981'
+                            return (
+                                <div key={g.id} className="goal-item" onClick={() => { setEditingGoal(g); setShowGoalModal(true) }} style={{ cursor: 'pointer' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '4px', fontFamily: 'var(--font-main)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                                            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{g.name}</span>
+                                            <span style={{ color: percentColor, fontSize: '0.75rem', fontWeight: 600 }}>
+                                                ({percent}%)
+                                            </span>
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
+                                            <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{g.current_amount ? g.current_amount.toLocaleString() : 0}</span>
+                                            <span style={{ margin: '0 2px' }}>/</span>
+                                            <span>{g.target_amount.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ width: '100%', height: '4px', background: '#f1f5f9', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{ height: '100%', background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)', width: `${Math.min(percent, 100)}%` }}></div>
+                                    </div>
+                                </div>
+                            )
+                        }) : (
+                            <div style={{ color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center', padding: '10px' }}>목표를 추가해보세요!</div>
+                        )}
+                    </div>
                 </div>
             </div>
 

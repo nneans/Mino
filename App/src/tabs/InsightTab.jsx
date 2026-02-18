@@ -3,19 +3,24 @@ import "./InsightTab.css"
 import '../components/MonthPicker.css'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { getKoreanCategory } from '../utils/constants'
-import { aiService } from '../services/apiService'
+import { aiService, goalService } from '../services/apiService'
 import { motion } from 'framer-motion'
 import { Skeleton } from '../components/Skeleton'
 import YearlyReportModal from '../modals/YearlyReportModal'
+import SavingsHistoryModal from '../modals/SavingsHistoryModal'
 import HeatmapCalendar from '../components/HeatmapCalendar'
 
 export default function InsightTab({ expenses = [], loading, config }) {
     const [showYearlyModal, setShowYearlyModal] = useState(false)
+    const [showSavingsModal, setShowSavingsModal] = useState(false)
+    const [goals, setGoals] = useState([])
+
     const [filter, setFilter] = useState('MONTHLY')
     const [currentMonth, setCurrentMonth] = useState(new Date())
     const [graphData, setGraphData] = useState(null)
     const [graphLoading, setGraphLoading] = useState(true)
     const [showHeatmap, setShowHeatmap] = useState(false)
+
 
     // Month Picker State (INBOX style)
     const [showMonthPicker, setShowMonthPicker] = useState(false)
@@ -33,6 +38,21 @@ export default function InsightTab({ expenses = [], loading, config }) {
         return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
+    // Fetch Goals on Modal Open
+    useEffect(() => {
+        if (showSavingsModal) {
+            const loadGoals = async () => {
+                try {
+                    const data = await goalService.getAll()
+                    setGoals(data || [])
+                } catch (err) {
+                    console.error("Failed to load goals", err)
+                }
+            }
+            loadGoals()
+        }
+    }, [showSavingsModal])
+
     useEffect(() => {
         const loadGraph = async () => {
             try {
@@ -45,6 +65,7 @@ export default function InsightTab({ expenses = [], loading, config }) {
             }
         }
         loadGraph()
+
     }, [])
 
     const handleMonthSelect = (m) => {
@@ -310,77 +331,86 @@ export default function InsightTab({ expenses = [], loading, config }) {
             <div className="insight-header-v2">
                 <div className="header-left">
                     <h2>인사이트</h2>
-                    <div className="header-actions">
+
+                    {/* INBOX style Month Picker (Moved here) */}
+                    <div className="inbox-filters new-style" style={{ marginLeft: '16px' }}>
+                        <div style={{ position: 'relative' }} ref={pickerRef}>
+                            <button
+                                className={`mini-filter-btn ${filter === 'MONTHLY' ? 'active' : ''}`}
+                                onClick={() => {
+                                    if (filter !== 'MONTHLY') setFilter('MONTHLY')
+                                    setShowMonthPicker(!showMonthPicker)
+                                }}
+                            >
+                                {currentMonth.getFullYear()}. {currentMonth.getMonth() + 1} ▾
+                            </button>
+
+                            {showMonthPicker && (
+                                <div className="month-picker-popover mini" style={{ left: 0, right: 'auto', transform: 'none' }}>
+                                    <div className="mp-header">
+                                        <button onClick={() => setPickerYear(pickerYear - 1)}>&lt;</button>
+                                        <span>{pickerYear}년</span>
+                                        <button onClick={() => setPickerYear(pickerYear + 1)}>&gt;</button>
+                                    </div>
+                                    <div className="mp-grid">
+                                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                            <button
+                                                key={m}
+                                                onClick={() => handleMonthSelect(m)}
+                                                className={currentMonth.getMonth() + 1 === m && currentMonth.getFullYear() === pickerYear ? 'active' : ''}
+                                            >
+                                                {m}월
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <button
-                            className={`action-btn ${showHeatmap ? 'active' : ''}`}
-                            onClick={() => setShowHeatmap(!showHeatmap)}
+                            className={`mini-filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                            onClick={() => setFilter('ALL')}
                         >
-                            📊 히트맵
-                        </button>
-                        <button
-                            className="action-btn"
-                            onClick={() => setShowYearlyModal(true)}
-                        >
-                            📈 연간 리포트
+                            전체
                         </button>
                     </div>
                 </div>
 
-                {/* INBOX style Month Picker */}
-                <div className="inbox-filters new-style">
-                    <div style={{ position: 'relative' }} ref={pickerRef}>
-                        <button
-                            className={`mini-filter-btn ${filter === 'MONTHLY' ? 'active' : ''}`}
-                            onClick={() => {
-                                if (filter !== 'MONTHLY') setFilter('MONTHLY')
-                                setShowMonthPicker(!showMonthPicker)
-                            }}
-                        >
-                            {currentMonth.getFullYear()}. {currentMonth.getMonth() + 1} ▾
-                        </button>
-
-                        {showMonthPicker && (
-                            <div className="month-picker-popover mini">
-                                <div className="mp-header">
-                                    <button onClick={() => setPickerYear(pickerYear - 1)}>&lt;</button>
-                                    <span>{pickerYear}년</span>
-                                    <button onClick={() => setPickerYear(pickerYear + 1)}>&gt;</button>
-                                </div>
-                                <div className="mp-grid">
-                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                                        <button
-                                            key={m}
-                                            onClick={() => handleMonthSelect(m)}
-                                            className={currentMonth.getMonth() + 1 === m && currentMonth.getFullYear() === pickerYear ? 'active' : ''}
-                                        >
-                                            {m}월
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
+                <div className="header-actions">
                     <button
-                        className={`mini-filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                        onClick={() => setFilter('ALL')}
+                        className={`action-btn ${showHeatmap ? 'active' : ''}`}
+                        onClick={() => setShowHeatmap(!showHeatmap)}
                     >
-                        전체
+                        히트맵
+                    </button>
+                    <button
+                        className="action-btn"
+                        onClick={() => setShowYearlyModal(true)}
+                    >
+                        연간 리포트
+                    </button>
+                    <button
+                        className="action-btn"
+                        onClick={() => setShowSavingsModal(true)}
+                    >
+                        저축
                     </button>
                 </div>
             </div>
 
             {/* Heatmap Calendar (Collapsible) */}
-            {showHeatmap && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="heatmap-section"
-                >
-                    <HeatmapCalendar expenses={expenses} year={currentMonth.getFullYear()} />
-                </motion.div>
-            )}
+            {
+                showHeatmap && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="heatmap-section"
+                    >
+                        <HeatmapCalendar expenses={expenses} year={currentMonth.getFullYear()} />
+                    </motion.div>
+                )
+            }
 
             {/* Performance Summary Cards */}
             <div className="performance-cards">
@@ -451,22 +481,24 @@ export default function InsightTab({ expenses = [], loading, config }) {
             </div>
 
             {/* AI Insights */}
-            {aiInsights.length > 0 && (
-                <div className="ai-insights-section">
-                    <h3>🧠 AI 소비 인사이트</h3>
-                    <div className="ai-insights-grid">
-                        {aiInsights.map((insight, i) => (
-                            <div key={i} className={`ai-insight-card ${insight.type}`}>
-                                <span className="ai-icon">{insight.icon}</span>
-                                <div className="ai-text">
-                                    <strong>{insight.title}</strong>
-                                    <p>{insight.text}</p>
+            {
+                aiInsights.length > 0 && (
+                    <div className="ai-insights-section">
+                        <h3>🧠 AI 소비 인사이트</h3>
+                        <div className="ai-insights-grid">
+                            {aiInsights.map((insight, i) => (
+                                <div key={i} className={`ai-insight-card ${insight.type}`}>
+                                    <span className="ai-icon">{insight.icon}</span>
+                                    <div className="ai-text">
+                                        <strong>{insight.title}</strong>
+                                        <p>{insight.text}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Main Stats Grid */}
             <div className="insight-grid-v2">
@@ -536,37 +568,47 @@ export default function InsightTab({ expenses = [], loading, config }) {
             </div>
 
             {/* Graph Insights (ALL filter only) */}
-            {filter === 'ALL' && (
-                <div className="graph-insights-section">
-                    <h3>🔗 소비 패턴 분석</h3>
-                    {graphLoading ? (
-                        <Skeleton height="100px" />
-                    ) : graphInsights.length > 0 ? (
-                        <div className="pattern-grid">
-                            {graphInsights.map((ins, i) => (
-                                <div key={i} className="pattern-card">
-                                    <span className="pattern-icon">{ins.icon}</span>
-                                    <div className="pattern-info">
-                                        <p className="pattern-text">{ins.text}</p>
-                                        <span className="pattern-sub">{ins.sub}</span>
+            {
+                filter === 'ALL' && (
+                    <div className="graph-insights-section">
+                        <h3>🔗 소비 패턴 분석</h3>
+                        {graphLoading ? (
+                            <Skeleton height="100px" />
+                        ) : graphInsights.length > 0 ? (
+                            <div className="pattern-grid">
+                                {graphInsights.map((ins, i) => (
+                                    <div key={i} className="pattern-card">
+                                        <span className="pattern-icon">{ins.icon}</span>
+                                        <div className="pattern-info">
+                                            <p className="pattern-text">{ins.text}</p>
+                                            <span className="pattern-sub">{ins.sub}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="empty-msg" style={{ padding: '20px', textAlign: 'center' }}>
-                            아직 충분한 소비 패턴 데이터가 쌓이지 않았습니다.<br />
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>데이터 동기화를 통해 이메일 데이터를 분석해보세요.</span>
-                        </p>
-                    )}
-                </div>
-            )}
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="empty-msg" style={{ padding: '20px', textAlign: 'center' }}>
+                                아직 충분한 소비 패턴 데이터가 쌓이지 않았습니다.<br />
+                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>데이터 동기화를 통해 이메일 데이터를 분석해보세요.</span>
+                            </p>
+                        )}
+                    </div>
+                )
+            }
+
 
             <YearlyReportModal
                 isOpen={showYearlyModal}
                 onClose={() => setShowYearlyModal(false)}
                 expenses={expenses}
                 config={config}
+            />
+
+            <SavingsHistoryModal
+                isOpen={showSavingsModal}
+                onClose={() => setShowSavingsModal(false)}
+                goals={goals}
+                expenses={expenses}
             />
         </motion.div>
     )

@@ -153,7 +153,7 @@ body:has(.modal-overlay) {
 
 .type-toggle {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
 }
 
@@ -178,6 +178,12 @@ body:has(.modal-overlay) {
     border-color: var(--success);
     background: #ecfdf5;
     color: var(--success);
+}
+
+.type-btn.active.saving {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #10b981;
 }
 
 /* Danger Zone Section */
