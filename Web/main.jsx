@@ -2,18 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, ChevronRight, ChevronLeft, Github, Mail, Map as MapIcon, MessageSquare, AlertTriangle, CheckCircle2, Command, Globe, Server, Code, Monitor, ExternalLink } from 'lucide-react';
 import logo from './assets/logo.png';
-import screen1 from './assets/screen1.png';
-import screen2 from './assets/screen2.png';
-import screen3 from './assets/screen3.png';
-import screen4 from './assets/screen4.png';
-import screen5 from './assets/screen5.png';
-
 const screenshots = [
-  { src: screen1, title: '대시보드', desc: '자산 현황과 지출 내역을 한눈에 파악' },
-  { src: screen2, title: '거래 내역', desc: '수입과 지출을 날짜별로 조회하고 관리' },
-  { src: screen3, title: '지출 지도', desc: '언제 어디서 썼는지 지도 위에 기록' },
-  { src: screen4, title: '인사이트', desc: '카테고리별 지출 통계와 소비 등급 분석' },
-  { src: screen5, title: 'AI 채팅', desc: '자연어로 묻고 답하는 내 돈 관리' },
+  { src: '/images/dashboard.png', title: '한눈에 파악하는 나의 재정 현황', desc: '대시보드에서 수입, 지출, 저축 목표를 한눈에 관리하세요.' },
+  { src: '/images/sync.png', title: '터치 한 번으로 끝나는 스마트한 지출 동기화', desc: 'Gmail과 연동하여 카드 결제 내역을 자동으로 가져옵니다.' },
+  { src: '/images/insight.png', title: '나보다 더 나를 잘 아는 인공지능 소비 분석', desc: 'AI가 사용자님의 소비 패턴을 분석하고 맞춤형 리포트를 제공합니다.' },
+  { src: '/images/report.png', title: '차트로 확인하는 월간/연간 재정 리포트', desc: '정확한 수치와 차트로 재정 흐름을 직관적으로 파악하세요.' },
+  { src: '/images/chat.png', title: '무엇이든 물어보세요, 개인 금융 비서 Mino', desc: 'LLM 기반 AI가 사용자님의 지출과 목표를 반영하여 답변합니다.' },
 ];
 
 function App() {
@@ -102,13 +96,10 @@ function App() {
               />
             </AnimatePresence>
 
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-
             {/* Caption */}
-            <div className="absolute bottom-8 left-8 text-white z-10">
-              <h3 className="text-2xl font-bold mb-1">{screenshots[currentImage].title}</h3>
-              <p className="text-gray-200">{screenshots[currentImage].desc}</p>
+            <div className="absolute bottom-8 left-8 text-blue-600 z-10 bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-blue-100 shadow-lg">
+              <h3 className="text-xl font-bold mb-1">{screenshots[currentImage].title}</h3>
+              <p className="text-gray-600 text-sm">{screenshots[currentImage].desc}</p>
             </div>
 
             {/* Controls */}
